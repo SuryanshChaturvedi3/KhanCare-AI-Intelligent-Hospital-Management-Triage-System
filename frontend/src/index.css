@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure the app can take full height and avoid default body centering. */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
