@@ -164,10 +164,33 @@ async def chat(user_query: UserQuery):
     config = RunnableConfig(configurable={"thread_id": thread_id})
 
     # Invoke the agent
-    result = await agent_app.ainvoke(
-        {"messages": [system_msg, human_msg]},
-        config=config,
-    )
+    try:
+        result = await agent_app.ainvoke(
+            {"messages": [system_msg, human_msg]},
+            config=config,
+        )
+    except Exception as e:
+        print(f"❌ Agent error: {e}")
+        # Fallback: try without checkpointer
+        try:
+            from langgraph.graph import StateGraph, START, END, add_messages
+            from langgraph.prebuilt import ToolNode, tools_condition
+            from agent import AgentState, assistant_node, node_agent, tools_list
+
+            fallback_builder = StateGraph(AgentState)
+            fallback_builder.add_node("assistant", assistant_node)
+            fallback_builder.add_node("tools", node_agent)
+            fallback_builder.add_edge(START, "assistant")
+            fallback_builder.add_conditional_edges("assistant", tools_condition, {"tools": "tools", "__end__": END})
+            fallback_builder.add_edge("tools", "assistant")
+            fallback_app = fallback_builder.compile()
+            result = await fallback_app.ainvoke({"messages": [system_msg, human_msg]})
+        except Exception as e2:
+            print(f"❌ Fallback also failed: {e2}")
+            return AgentResponse(
+                response="I'm having trouble processing your request right now. Please try again in a moment.",
+                thread_id=thread_id,
+            )
 
     # Extract response
     messages = result.get("messages", [])

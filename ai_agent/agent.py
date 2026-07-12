@@ -63,14 +63,26 @@ def create_graph_agent():
     builder.add_edge("tools", "assistant")
 
     if mongo_url:
-        print(f"🔗 Connecting to MongoDB for memory...")
-        client = MongoClient(mongo_url)
-        checkpointer = MongoDBSaver(
-            client=client,
-            db_name="khan_care_db",
-            collection_name="checkpoints"
-        )
-        return builder.compile(checkpointer=checkpointer)
+        try:
+            print(f"🔗 Connecting to MongoDB for memory...")
+            client = MongoClient(
+                mongo_url,
+                serverSelectionTimeoutMS=5000,
+                connectTimeoutMS=5000,
+            )
+            # Test the connection
+            client.admin.command('ping')
+            checkpointer = MongoDBSaver(
+                client=client,
+                db_name="khan_care_db",
+                collection_name="checkpoints"
+            )
+            print("✅ MongoDB checkpointer ready!")
+            return builder.compile(checkpointer=checkpointer)
+        except Exception as e:
+            print(f"⚠️ MongoDB connection failed: {e}")
+            print("⚠️ Running without memory (stateless mode).")
+            return builder.compile()
     else:
         print("⚠️ No MongoDB URL. Running without memory.")
         return builder.compile()
