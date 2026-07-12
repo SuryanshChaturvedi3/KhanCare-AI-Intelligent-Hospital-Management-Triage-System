@@ -1,4 +1,10 @@
-# KhanCare AI 2.0
+# KhanCare AI – Intelligent Hospital Management & Triage System
+
+KhanCare AI is a comprehensive, microservices-based healthcare management system designed to optimize hospital workflows and enhance the patient experience.
+
+At its core, the platform bridges the gap between hospital administration and patient care. It features a robust MERN-stack operations portal providing dedicated, real-time dashboards for patients, receptionists, and doctors to manage token-based appointment queues.
+
+The standout feature is its Advanced AI Triage Agent, powered by Python, LangGraph, and a Qdrant Vector Database. This agent safely interacts with patients to understand their symptoms, offers general first-aid guidance, and strictly routes them to the appropriate specialist (e.g., Cardiology, Orthopedics). Additionally, it integrates a RAG-based knowledge system to help patients query affordable generic medicines via the Jan Aushadhi database, making healthcare both accessible and intelligent.
 
 KhanCare AI is a hospital operations platform with three parts:
 
