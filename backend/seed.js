@@ -11,15 +11,23 @@ async function seed() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB connected");
 
-    // hash password
-    const hashedPassword = await bcrypt.hash("hospital123", 10);
+    // hash passwords
+    const staffPassword = await bcrypt.hash("hospital123", 10);
+    const demoPassword = await bcrypt.hash("demo123", 10);
 
-    // create staff
+    // create staff + demo patient
     await User.insertMany([
+      {
+        name: "Demo Patient",
+        email: "patient@demo.com",
+        password: demoPassword,
+        role: "patient",
+        phone: "9999999999",
+      },
       {
         name: "Dr Khan",
         email: "dr.khan@khan.com",
-        password:hashedPassword,
+        password: staffPassword,
         role: "doctor",
         phone: "1234567890",
         department: "Cardiology"
@@ -27,7 +35,7 @@ async function seed() {
       {
         name: "Dr Sharma",
         email: "dr.sharma@khan.com",
-        password:hashedPassword,
+        password: staffPassword,
         role: "doctor",
         phone: "1234567891",
         department: "Neurology"
@@ -35,7 +43,7 @@ async function seed() {
       {
         name: "Reception",
         email: "reception@khan.com",
-        password:hashedPassword,
+        password: staffPassword,
         role: "receptionist",
         phone: "1234567892"
       }

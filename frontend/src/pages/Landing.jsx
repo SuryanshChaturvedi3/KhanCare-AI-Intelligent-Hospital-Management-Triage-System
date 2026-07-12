@@ -101,6 +101,26 @@ const Landing = () => {
           </div>
         </div>
 
+        {/* Demo Credentials Card */}
+        <div className="mt-12 w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-6 text-left">
+          <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-4">🔑 Demo Credentials</h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between items-center py-2 border-b border-white/5">
+              <span className="text-gray-400">👤 Patient</span>
+              <span className="text-white font-mono text-xs">patient@demo.com / demo123</span>
+            </div>
+            <div className="flex justify-between items-center py-2 border-b border-white/5">
+              <span className="text-gray-400">👨‍⚕️ Doctor</span>
+              <span className="text-white font-mono text-xs">dr.khan@khan.com / hospital123</span>
+            </div>
+            <div className="flex justify-between items-center py-2">
+              <span className="text-gray-400">🏥 Reception</span>
+              <span className="text-white font-mono text-xs">reception@khan.com / hospital123</span>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-4">Or register a new account to test the full flow.</p>
+        </div>
+
       </main>
     </div>
   );
