@@ -10,7 +10,7 @@ Usage:
 import os
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
@@ -37,21 +37,28 @@ splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=400)
 chunks = splitter.split_documents(docs)
 print(f"   Total chunks: {len(chunks)}")
 
-# ---- 4. Embeddings ----
-embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+# ---- 4. Embeddings (Gemini) ----
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="models/gemini-embedding-001",
+    google_api_key=os.getenv("GOOGLE_API_KEY"),
+)
 
 # ---- 5. Qdrant setup ----
-client = QdrantClient(url=QDRANT_URL)
+api_key = os.getenv("QDRANT_API_KEY")
+client = QdrantClient(
+    url=QDRANT_URL,
+    api_key=api_key if api_key else None,
+)
 
 # Delete old collection if exists
 if client.collection_exists(COLLECTION_NAME):
     client.delete_collection(COLLECTION_NAME)
     print(f"🗑️  Old collection '{COLLECTION_NAME}' deleted.")
 
-# Create fresh collection (1536 dims for text-embedding-3-small)
+# Create fresh collection (3072 dims for gemini-embedding-001)
 client.create_collection(
     collection_name=COLLECTION_NAME,
-    vectors_config=VectorParams(size=1536, distance=Distance.COSINE),
+    vectors_config=VectorParams(size=3072, distance=Distance.COSINE),
 )
 print(f"✅ Fresh collection '{COLLECTION_NAME}' created.")
 
@@ -61,6 +68,7 @@ QdrantVectorStore.from_documents(
     documents=chunks,
     embedding=embeddings,
     url=QDRANT_URL,
+    api_key=api_key if api_key else None,
     collection_name=COLLECTION_NAME,
     force_recreate=False,   # collection already created above
 )

@@ -1,0 +1,61 @@
+# ============================================
+# KhanCare AI — Docker Compose
+# ============================================
+# DATABASES: MongoDB Atlas (cloud) + Qdrant Cloud
+# All DB URLs come from .env file — no local DB containers needed!
+#
+# HOW TO USE:
+#   1. Fill in .env with your cloud DB URLs
+#   2. docker compose up --build
+#   3. Visit: http://localhost (frontend)
+#
+# STOP: docker compose down
+
+services:
+  # ==================== FRONTEND ====================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:5000
+        VITE_AI_URL: http://localhost:8000
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - ai-agent
+    restart: unless-stopped
+
+  # ==================== BACKEND ====================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      MONGO_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: http://localhost
+      AI_AGENT_URL: http://ai-agent:8000
+      NODE_ENV: production
+    depends_on:
+      - ai-agent
+    restart: unless-stopped
+
+  # ==================== AI AGENT ====================
+  ai-agent:
+    build:
+      context: ./ai_agent
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      MONGO_URL: ${MONGO_URL}
+      QDRANT_URL: ${QDRANT_URL}
+      QDRANT_API_KEY: ${QDRANT_API_KEY}
+      ALLOWED_ORIGINS: http://localhost,http://localhost:5000,http://localhost:80
+    restart: unless-stopped

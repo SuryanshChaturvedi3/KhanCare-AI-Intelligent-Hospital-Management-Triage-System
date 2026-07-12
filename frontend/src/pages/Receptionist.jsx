@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, Calendar, ChevronLeft, ChevronRight, Users, Clock, Stethoscope, LogOut } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const DEPT_PALETTE = [
   { bg: "rgba(56,189,248,0.08)",  border: "rgba(56,189,248,0.25)",  badge: "#38bdf8", label: "#7dd3fc" },
   { bg: "rgba(167,139,250,0.08)", border: "rgba(167,139,250,0.25)", badge: "#a78bfa", label: "#c4b5fd" },
@@ -41,7 +43,7 @@ const Receptionist = () => {
   const fetchAllData = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/appointments/receptionist", {
+      const res = await axios.get(`${API_URL}/api/appointments/receptionist`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAllPatients(res.data.data || []);
@@ -61,11 +63,11 @@ const Receptionist = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/appointments/complete/${appointmentId}`,
+        `${API_URL}/api/appointments/complete/${appointmentId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // fetchAllData(); // 🚨 Isey hata sakte ho kyunki Socket khud update mangwa lega, par rakhna chaho toh rakh lo fast UI ke liye.
+      fetchAllData(); // Refresh the list after marking complete
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Failed to update status.");

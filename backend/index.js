@@ -25,8 +25,10 @@ mongoose
 /*------------------MIDDLEWARES------------------*/
 
 // CORS Configuration - Must be before routes
+// WHY env var: In production, frontend runs on a different domain (e.g., khancare.onrender.com)
+// Hardcoding localhost would block all production requests
 app.use(cors({
-   origin: "http://localhost:5173",  // React frontend port
+   origin: process.env.FRONTEND_URL || "http://localhost:5173",
    credentials: true
 }));
 app.use(express.json()); // JSON ko samajhne do (Data ke liye)
@@ -53,7 +55,8 @@ app.post("/api/chat", async (req, res) => {
 
 // Step B: Python Agent (Port 8000) ko Phone lagao (Axios)
   try {
-    const pythonResponse = await axios.post("http://127.0.0.1:8000/chat", {
+    const AI_URL = process.env.AI_AGENT_URL || "http://127.0.0.1:8000";
+    const pythonResponse = await axios.post(`${AI_URL}/chat`, {
       query: query,
       thread_id: thread_id,
     });

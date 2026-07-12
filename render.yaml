@@ -1,0 +1,90 @@
+# ============================================
+# Render Blueprint — Deploy All Services at Once
+# ============================================
+# WHY render.yaml?
+# Instead of manually creating 3 services on Render dashboard,
+# this file does it automatically. Push to GitHub → Render reads this → deploys all.
+#
+# HOW TO USE:
+# 1. Push this file to your GitHub repo
+# 2. Go to Render Dashboard → "New" → "Blueprint"
+# 3. Connect your repo → Render creates all services automatically
+# 4. Fill in the environment variables in Render dashboard
+#
+# DOCS: https://docs.render.com/blueprint-spec
+
+services:
+  # ==================== BACKEND ====================
+  - type: web
+    name: khancare-backend
+    runtime: node
+    region: singapore  # Closest to India
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: node index.js
+    plan: starter  # $7/mo — free tier sleeps after 15min inactivity
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false  # "sync: false" = you fill it manually in dashboard (secret)
+      - key: JWT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        # This gets auto-filled after frontend deploys
+        fromService:
+          type: web
+          name: khancare-frontend
+          property: host
+      - key: AI_AGENT_URL
+        fromService:
+          type: web
+          name: khancare-ai
+          property: hostport
+
+  # ==================== AI AGENT ====================
+  - type: web
+    name: khancare-ai
+    runtime: python
+    region: singapore
+    rootDir: ai_agent
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    plan: starter  # Needs at least 512MB RAM for FAISS + LangChain
+    envVars:
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MONGO_URL
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false  # Set to: https://khancare-frontend.onrender.com,https://khancare-backend.onrender.com
+
+  # ==================== FRONTEND (Static Site) ====================
+  - type: web
+    name: khancare-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    # WHY routes?
+    # Same reason as nginx.conf — React Router needs all paths to serve index.html
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # These are BUILD-TIME variables (Vite bakes them in)
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: khancare-backend
+          property: host
+      - key: VITE_AI_URL
+        fromService:
+          type: web
+          name: khancare-ai
+          property: host

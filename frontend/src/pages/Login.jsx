@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Mail, Lock, Eye, EyeOff, ArrowUpLeft, MoveRight } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,10 +21,10 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
-    email: email.trim(),
-    password: password.trim()
-  },);
+      const res = await axios.post(`${API_URL}/api/auth/login`, {
+        email: email.trim(),
+        password: password.trim()
+      });
       if (res.data.token) {
         localStorage.setItem("token", res.data.token);
         const role = res.data.data?.role || "patient";
@@ -205,18 +207,9 @@ const Login = () => {
           pointer-events: none;
         }
 
-        .lr-right-glow2 {
-          position: absolute;
-          width: 300px; height: 300px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(234,179,8,0.04) 0%, transparent 65%);
-          bottom: -80px; left: -60px;
-          pointer-events: none;
-        }
-
         .lr-form-wrap {
           width: 100%;
-          max-width: 360px;
+          max-width: 380px;
           position: relative;
           z-index: 2;
           opacity: 0;
@@ -236,18 +229,8 @@ const Login = () => {
           letter-spacing: 0.04em;
           margin-bottom: 44px;
           transition: color 0.2s;
-          position: relative;
-        }
-        .lr-back::after {
-          content: '';
-          position: absolute;
-          bottom: -2px; left: 0;
-          width: 0; height: 1px;
-          background: rgba(234,179,8,0.6);
-          transition: width 0.3s ease;
         }
         .lr-back:hover { color: rgba(255,255,255,0.65); }
-        .lr-back:hover::after { width: 100%; }
 
         .lr-form-header { margin-bottom: 38px; }
 
@@ -266,7 +249,6 @@ const Login = () => {
           font-weight: 700;
           color: #f5f0e8;
           line-height: 1.15;
-          letter-spacing: -0.01em;
         }
 
         .lr-form-title span {
@@ -363,23 +345,10 @@ const Login = () => {
           box-shadow: 0 6px 28px rgba(232,184,5,0.22), 0 2px 8px rgba(232,184,5,0.12);
         }
 
-        .lr-submit::before {
-          content: '';
-          position: absolute;
-          top: 0; left: -100%;
-          width: 60%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
-          transform: skewX(-20deg);
-          transition: left 0.55s ease;
-        }
-
         .lr-submit:hover:not(:disabled) {
           transform: translateY(-2px);
           box-shadow: 0 12px 36px rgba(232,184,5,0.3), 0 4px 12px rgba(232,184,5,0.16);
         }
-
-        .lr-submit:hover:not(:disabled)::before { left: 160%; }
         .lr-submit:active:not(:disabled) { transform: translateY(0px); }
         .lr-submit:disabled { opacity: 0.55; cursor: not-allowed; }
 
@@ -401,21 +370,6 @@ const Login = () => {
           30% { transform: translateY(-6px); opacity: 1; }
         }
 
-        .lr-foot {
-          margin-top: 28px;
-          text-align: center;
-          font-size: 13px;
-          color: rgba(255,255,255,0.22);
-        }
-
-        .lr-foot a {
-          color: #ca9a04;
-          text-decoration: none;
-          font-weight: 500;
-          transition: color 0.2s;
-        }
-        .lr-foot a:hover { color: #f5c518; }
-
         .lr-divider {
           display: flex;
           align-items: center;
@@ -432,6 +386,21 @@ const Login = () => {
           color: rgba(255,255,255,0.18);
           letter-spacing: 0.06em;
         }
+
+        .lr-foot {
+          margin-top: 28px;
+          text-align: center;
+          font-size: 13px;
+          color: rgba(255,255,255,0.22);
+        }
+
+        .lr-foot a {
+          color: #ca9a04;
+          text-decoration: none;
+          font-weight: 500;
+          transition: color 0.2s;
+        }
+        .lr-foot a:hover { color: #f5c518; }
       `}</style>
 
       <div className="lr-root">
@@ -446,7 +415,7 @@ const Login = () => {
             <div className="lr-brand-icon">
               <div className="lr-brand-cross" />
             </div>
-            <span className="lr-brand-name">MediPortal</span>
+            <span className="lr-brand-name">KhanCare</span>
           </div>
 
           <div className="lr-tagblock">
@@ -479,7 +448,6 @@ const Login = () => {
 
         <div className="lr-right">
           <div className="lr-right-glow" />
-          <div className="lr-right-glow2" />
 
           <div className={`lr-form-wrap ${mounted ? 'in' : ''}`}>
 

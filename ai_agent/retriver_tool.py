@@ -1,25 +1,38 @@
 import os
-from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.tools import create_retriever_tool
-from langchain_community.vectorstores import FAISS
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
 from dotenv import load_dotenv
 
 load_dotenv()
 
-FAISS_INDEX_PATH = os.path.join(os.path.dirname(__file__), "vector_database")
+QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+COLLECTION_NAME = "khancare_memory"
 
 
 def create_retrival_tool():
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-
-    # Load the local FAISS vector store
-    vector_database = FAISS.load_local(
-        FAISS_INDEX_PATH,
-        embeddings,
-        allow_dangerous_deserialization=True,
+    # Gemini embeddings instead of OpenAI
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        google_api_key=os.getenv("GOOGLE_API_KEY"),
     )
 
-    retriever = vector_database.as_retriever(
+    # Connect to Qdrant vector database
+    # If QDRANT_API_KEY is set → cloud mode, otherwise → local
+    api_key = os.getenv("QDRANT_API_KEY")
+    client = QdrantClient(
+        url=QDRANT_URL,
+        api_key=api_key if api_key else None,
+    )
+
+    vector_store = QdrantVectorStore(
+        client=client,
+        collection_name=COLLECTION_NAME,
+        embedding=embeddings,
+    )
+
+    retriever = vector_store.as_retriever(
         search_kwargs={"k": 5}
     )
 
@@ -33,7 +46,7 @@ def create_retrival_tool():
         ),
     )
 
-    print("✅ FAISS Retrieval tool created successfully!")
+    print("✅ Qdrant Retrieval tool created successfully!")
     return tool
 
 

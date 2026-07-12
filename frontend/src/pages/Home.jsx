@@ -3,6 +3,8 @@ import axios from "axios";
 import { Activity, LogOut, RefreshCw, ChevronRight, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const Home = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ const Home = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.get(
-        "http://localhost:5000/api/appointments/status",
+        `${API_URL}/api/appointments/status`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -43,7 +45,7 @@ const Home = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://localhost:5000/api/appointments/appointment",
+        `${API_URL}/api/appointments/appointment`,
         bookingData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -170,7 +172,7 @@ const Home = () => {
                       Select Department
                     </label>
                     <select
-                      className="w-full bg-black/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-500"
+                      className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-500 text-white appearance-none"
                       onChange={(e) =>
                         setBookingData({
                           ...bookingData,
@@ -179,12 +181,16 @@ const Home = () => {
                       }
                       required
                     >
-                      <option value="">Choose...</option>
-                      <option value="General Medicine">
-                        General Physician
-                      </option>
-                      <option value="Cardiology">Cardiology</option>
-                      <option value="Neurology">Neurology</option>
+                      <option value="" className="bg-gray-900 text-gray-400">Choose...</option>
+                      <option value="General Medicine" className="bg-gray-900 text-white">General Medicine</option>
+                      <option value="Cardiology" className="bg-gray-900 text-white">Cardiology</option>
+                      <option value="Neurology" className="bg-gray-900 text-white">Neurology</option>
+                      <option value="Orthopedic" className="bg-gray-900 text-white">Orthopedic</option>
+                      <option value="Dermatology" className="bg-gray-900 text-white">Dermatology</option>
+                      <option value="ENT" className="bg-gray-900 text-white">ENT</option>
+                      <option value="Pediatrics" className="bg-gray-900 text-white">Pediatrics</option>
+                      <option value="Gynecology" className="bg-gray-900 text-white">Gynecology</option>
+                      <option value="Gastroenterology" className="bg-gray-900 text-white">Gastroenterology</option>
                     </select>
                   </div>
                   <div className="space-y-2">
@@ -194,7 +200,7 @@ const Home = () => {
                     <input
                       type="date"
                       min={new Date().toISOString().split("T")[0]}
-                      className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-500"
+                      className="w-full bg-white/5 border border-white/10 p-4 rounded-2xl outline-none focus:border-cyan-500 text-white [color-scheme:dark]"
                       onChange={(e) =>
                         setBookingData({ ...bookingData, date: e.target.value })
                       }

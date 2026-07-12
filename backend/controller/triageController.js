@@ -1,6 +1,7 @@
 const axios = require("axios");
 
-const PYTHON_TRIAGE_URL = "http://127.0.0.1:8000/triage";
+// Now uses the unified /chat endpoint (same as medicine search)
+const AI_URL = process.env.AI_AGENT_URL || "http://127.0.0.1:8000";
 
 const getTriageResponse = async (req, res) => {
   const { message, thread_id } = req.body;
@@ -9,10 +10,8 @@ const getTriageResponse = async (req, res) => {
     return res.status(400).json({ message: "message field is required." });
   }
 
-  console.log("Triage request received");
-
   try {
-    const pythonRes = await axios.post(PYTHON_TRIAGE_URL, {
+    const pythonRes = await axios.post(`${AI_URL}/chat`, {
       query: message,
       thread_id: thread_id,
     });
@@ -28,7 +27,7 @@ const getTriageResponse = async (req, res) => {
   } catch (error) {
     console.error("Triage proxy error:", error.message);
     return res.status(503).json({
-      reply: "MediStep AI is temporarily unavailable. Please contact the hospital reception.",
+      reply: "AI is temporarily unavailable. Please contact hospital reception.",
       is_emergency: false,
     });
   }

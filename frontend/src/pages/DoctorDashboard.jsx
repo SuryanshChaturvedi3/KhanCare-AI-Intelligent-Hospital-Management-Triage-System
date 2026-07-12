@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, Clock, User, Stethoscope, Activity, Phone, LogOut } from "lucide-react";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const DoctorDashboard = () => {
 
   const [queue, setQueue] = useState([]);
@@ -25,7 +27,7 @@ const DoctorDashboard = () => {
       }
 
       const res = await axios.get(
-        "http://localhost:5000/api/appointments/doctor",
+        `${API_URL}/api/appointments/doctor`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -60,7 +62,7 @@ const DoctorDashboard = () => {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `http://localhost:5000/api/appointments/complete/${appointmentId}`,
+        `${API_URL}/api/appointments/complete/${appointmentId}`,
         {},
         {
           headers: {

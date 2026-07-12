@@ -13,8 +13,11 @@ __pycache__/
 # Node
 node_modules/
 
-# Vector DB (rebuild via index.py)
-ai_agent/vector_database/
+# Vector DB — UNCOMMENT the line below for deployment!
+# The FAISS index is needed at runtime. Either:
+# 1. Remove this ignore line and push vector_database/ to git, OR
+# 2. Add a Docker build step that rebuilds it (requires OPENAI_API_KEY at build time)
+# ai_agent/vector_database/
 
 # Logs
 *.log
@@ -31,7 +34,7 @@ backend/node_modules/
 ai_agent/.venv/
 ai_agent/__pycache__/
 qdrant_storage/
-vector_database/
+# vector_database/ — KEEP THIS COMMENTED for deployment (see note above)
 
 # Environment variables (NEVER PUSH .env to GitHub)
 .env

@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // Components & Pages Imports
 import ChatWidget from "./components/ChatWidget";
-import TriageWidget from "./components/TriageWidget";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
@@ -75,7 +74,6 @@ function App() {
         </Routes>
 
         {/* Global Chat Widget */}
-        <TriageWidget />
         <ChatWidget />
       </div>
     </BrowserRouter>

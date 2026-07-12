@@ -1,0 +1,13 @@
+# Don't copy virtual environment (we install fresh in container)
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+.git
+.gitignore
+
+# FAISS files not needed — using Qdrant now
+vector_database/

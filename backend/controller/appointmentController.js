@@ -37,7 +37,9 @@ const createAppointment = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const bookingDate = new Date(date);
+    // Fix timezone: "2024-07-13" → treat as local date, not UTC
+    const [year, month, day] = date.split("-").map(Number);
+    const bookingDate = new Date(year, month - 1, day);
 
     if (bookingDate < today) {
       return res.status(400).json({
@@ -60,7 +62,7 @@ const createAppointment = async (req, res) => {
     // --- 3. GET LAST TOKEN ---
     const lastAppointment = await Appointment.findOne({
       department,
-      appointmentDate: new Date(date),
+      appointmentDate: bookingDate,
     }).sort({ tokenNumber: -1 });
 
     const newTokenNumber = lastAppointment
@@ -71,7 +73,7 @@ const createAppointment = async (req, res) => {
     const newAppointment = await Appointment.create({
       patientId,
       department,
-      appointmentDate: new Date(date),
+      appointmentDate: bookingDate,
       tokenNumber: newTokenNumber,
       status: "Pending",
     });
