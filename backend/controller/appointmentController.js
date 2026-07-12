@@ -47,15 +47,17 @@ const createAppointment = async (req, res) => {
       });
     }
 
-    // --- 2. CHECK EXISTING PENDING APPOINTMENT ---
+    // --- 2. CHECK EXISTING PENDING APPOINTMENT (same department, same day) ---
     const existing = await Appointment.findOne({
       patientId,
+      department,
+      appointmentDate: bookingDate,
       status: "Pending",
     });
 
     if (existing) {
       return res.status(400).json({
-        message: "Wait for your Number, appointment already exists",
+        message: `You already have a pending appointment in ${department} for this date.`,
       });
     }
 
@@ -116,12 +118,13 @@ const getLiveStatus = async (req, res) => {
 
     const patientId = req.user.id;
 
-    const activeAppt = await Appointment.findOne({
+    // Find ALL pending appointments for this patient
+    const activeAppts = await Appointment.find({
       patientId,
       status: "Pending",
     }).sort({ createdAt: -1 });
 
-    if (!activeAppt) {
+    if (!activeAppts.length) {
       return res.status(200).json({
         success: true,
         hasActiveAppointment: false,
@@ -129,24 +132,30 @@ const getLiveStatus = async (req, res) => {
       });
     }
 
-    const peopleAhead = await Appointment.countDocuments({
-      department: activeAppt.department,
-      appointmentDate: activeAppt.appointmentDate,
-      status: "Pending",
-      tokenNumber: { $lt: activeAppt.tokenNumber },
-    });
-
-    const currentPosition = peopleAhead + 1;
+    // Calculate position for each appointment
+    const appointments = await Promise.all(
+      activeAppts.map(async (appt) => {
+        const peopleAhead = await Appointment.countDocuments({
+          department: appt.department,
+          appointmentDate: appt.appointmentDate,
+          status: "Pending",
+          tokenNumber: { $lt: appt.tokenNumber },
+        });
+        return {
+          _id: appt._id,
+          originalToken: appt.tokenNumber,
+          currentPosition: peopleAhead + 1,
+          department: appt.department,
+          appointmentDate: appt.appointmentDate,
+        };
+      })
+    );
 
     res.status(200).json({
       success: true,
       hasActiveAppointment: true,
-      data: {
-        originalToken: activeAppt.tokenNumber,
-        currentPosition,
-        department: activeAppt.department,
-        appointmentDate: activeAppt.appointmentDate,
-      },
+      data: appointments[0],
+      allAppointments: appointments,
     });
 
   } catch (error) {

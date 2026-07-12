@@ -8,8 +8,8 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const Home = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [appointment, setAppointment] = useState(null);
-  const [user, setUser] = useState({ name: "Patient" }); // Ye aage chal kar profile API se aayega
+  const [appointments, setAppointments] = useState([]);
+  const [user, setUser] = useState({ name: "Patient" });
   const [bookingData, setBookingData] = useState({ department: "", date: "" });
 
   const fetchStatus = async () => {
@@ -25,9 +25,9 @@ const Home = () => {
       );
 
       if (res.data.hasActiveAppointment) {
-        setAppointment(res.data.data);
+        setAppointments(res.data.allAppointments || [res.data.data]);
       } else {
-        setAppointment(null);
+        setAppointments([]);
       }
     } catch (err) {
       console.error("Fetch Error:", err);
@@ -98,66 +98,41 @@ const Home = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* --- Left Column: Main Action (Tracker or Form) --- */}
           <div className="lg:col-span-2 space-y-8">
-            {appointment ? (
-              /* ACTIVE TRACKER CARD */
-              <div className="bg-gradient-to-br from-cyan-900/40 to-black border border-cyan-500/30 rounded-[2.5rem] p-8 relative overflow-hidden">
-                <div className="relative z-10">
-                  <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-3xl font-black">Live Queue Tracker</h2>
-                    <span className="bg-cyan-500 text-black px-4 py-1 rounded-full text-xs font-bold animate-pulse">
-                      LIVE
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row gap-8 items-center">
-                    <div className="w-48 h-48 rounded-full border-8 border-cyan-500/20 flex items-center justify-center relative">
-                      <div className="text-center">
-                        <p className="text-sm text-gray-400">Position</p>
-                        <p className="text-6xl font-black text-cyan-400">
-                          {appointment.currentPosition}
-                        </p>
-                      </div>
-                      <svg className="absolute top-0 left-0 w-full h-full -rotate-90">
-                        <circle
-                          cx="96"
-                          cy="96"
-                          r="88"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="8"
-                          className="text-cyan-500"
-                          strokeDasharray="553"
-                          strokeDashoffset={553 - 553 * 0.7}
-                        />
-                      </svg>
-                    </div>
-
-                    <div className="flex-1 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                          <p className="text-xs text-gray-500">Your Token</p>
-                          <p className="text-xl font-bold">
-                            #{appointment.originalToken}
-                          </p>
-                        </div>
-                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                          <p className="text-xs text-gray-500">Department</p>
-                          <p className="text-xl font-bold">
-                            {appointment.department}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={fetchStatus}
-                        className="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-4 rounded-2xl hover:bg-cyan-400 transition-all"
-                      >
-                        <RefreshCw size={18} /> Refresh Status
-                      </button>
-                    </div>
-                  </div>
+            {appointments.length > 0 && (
+              /* ACTIVE TRACKER CARDS */
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-2xl font-black">Live Queue Tracker</h2>
+                  <span className="bg-cyan-500 text-black px-4 py-1 rounded-full text-xs font-bold animate-pulse">
+                    LIVE
+                  </span>
                 </div>
+                {appointments.map((appt, idx) => (
+                  <div key={appt._id || idx} className="bg-gradient-to-br from-cyan-900/30 to-black border border-cyan-500/20 rounded-2xl p-6 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 rounded-full border-4 border-cyan-500/30 flex items-center justify-center">
+                        <div className="text-center">
+                          <p className="text-xs text-gray-400">Position</p>
+                          <p className="text-3xl font-black text-cyan-400">{appt.currentPosition}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-lg font-bold">{appt.department}</p>
+                        <p className="text-sm text-gray-400">Token #{appt.originalToken}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <button
+                  onClick={fetchStatus}
+                  className="w-full flex items-center justify-center gap-2 bg-white text-black font-bold py-3 rounded-2xl hover:bg-cyan-400 transition-all"
+                >
+                  <RefreshCw size={18} /> Refresh All
+                </button>
               </div>
-            ) : (
+            )}
+
+            {/* BOOKING FORM — always visible now */}
               /* BOOKING FORM CARD */
               <div className="bg-white/5 border border-white/10 rounded-[2.5rem] p-8">
                 <h2 className="text-2xl font-bold mb-6">
@@ -215,7 +190,6 @@ const Home = () => {
                   </button>
                 </form>
               </div>
-            )}
 
             {/* AI Call To Action */}
             <div className="bg-gradient-to-r from-blue-600/10 to-transparent border border-white/10 rounded-[2rem] p-6 flex items-center justify-between">
